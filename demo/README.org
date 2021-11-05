@@ -1,4 +1,4 @@
-#TITLE: A Demonstration of Vanadium Ledger
+#+title: A Demonstration of Vanadium Ledger
 
 This document gives a tour of Vanadium Ledger in action, using a
 publicly accessible runnning instance of the software described in the
