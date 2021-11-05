@@ -1,4 +1,7 @@
 #+title: A Demonstration of Vanadium Ledger
+#+date: <2021-11-05 Fri>
+#+author: cew
+#+email: cliff@osetfoundation.org
 
 This document gives a tour of Vanadium Ledger in action, using a
 publicly accessible runnning instance of the software described in the
@@ -25,6 +28,9 @@ APIs.
    illustrate the activities of Vanadium Ledger.)
 
 *** The Dashboard
+    #+CAPTION: This is what the Dashboard looks like
+    #+NAME:    fig:001
+    [[./img/001.png]]
 
 *** The Transaction List
 
