@@ -1,7 +1,34 @@
-This readme will describe the running instance of the code described in /src.  It will:
+#TITLE: A Demonstration of Vanadium Ledger
 
-- contain some sample =curl= commands;
-- explain that in real life there would be real secrets and no path from the Internet to the API to append to the ledger;
-- contain screencap(s) from swagger;
-- explain what HyperLedger Navigator is;
-- narrate a sample session with HyperLedger
+This document gives a tour of Vanadium Ledger in action, using a
+publicly accessible runnning instance of the software described in the
+=/src= directory.  In an actual deployment, of course, Electorate
+Vanadium would run with a high level of security: there would be real
+secrets, and there would be no path from the Internet to the Vanadium
+APIs.
+
+* The Vanadium Ledger API
+  This section includes swagger screencaps and discussion.
+
+* Reviewing the Vanadium Ledger
+  This section will review the separation of Electorate components and
+  the independence of UI from backend.  It will then introduce
+  Hyperledger Explorer as a simple HTTP client for visualizing
+  operations on a Hyperledger Fabric.
+
+** Introducing Hyperledger Explorer
+   This section walks through some of the Hyperledger Explorer screens
+   and demonstrates how you can examine transactions.
+
+   (This demo isn't a full demonstration of the Hyperledger Explorer
+   tool.  We're going to focus on features and operations that
+   illustrate the activities of Vanadium Ledger.)
+
+*** The Dashboard
+
+*** The Transaction List
+
+*** Transaction Details
+
+* Appending Voter Records to Vanadium Ledger
+  This section will include some sample =curl= commands.
