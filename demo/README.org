@@ -1,0 +1,7 @@
+This readme will describe the running instance of the code described in /src.  It will:
+
+- contain some sample =curl= commands;
+- explain that in real life there would be real secrets and no path from the Internet to the API to append to the ledger;
+- contain screencap(s) from swagger;
+- explain what HyperLedger Navigator is;
+- narrate a sample session with HyperLedger
