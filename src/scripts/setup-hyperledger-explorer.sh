@@ -1,0 +1,87 @@
+#!/bin/bash -e
+
+
+cd "$(dirname ${BASH_SOURCE[0]})/.."
+
+
+export CREDENTIALS_STACK="CredentialsStack"
+export LEDGER_STACK="LedgerStack"
+export EXPLORER_STACK="ExplorerStack"
+
+export NETWORK_ID=$(aws cloudformation describe-stacks --stack-name $LEDGER_STACK --query 'Stacks[0].Outputs[?OutputKey==`NetworkId`].OutputValue' --output text)
+export MEMBER_ID=$(aws cloudformation describe-stacks --stack-name $LEDGER_STACK --query 'Stacks[0].Outputs[?OutputKey==`MemberId`].OutputValue' --output text)
+export NODE_ID=$(aws cloudformation describe-stacks --stack-name $LEDGER_STACK --query 'Stacks[0].Outputs[?OutputKey==`NodeId`].OutputValue' --output text)
+
+export MEMBER_NAME=$(aws cloudformation describe-stacks --stack-name $LEDGER_STACK --query 'Stacks[0].Outputs[?OutputKey==`MemberName`].OutputValue' --output text)
+
+export ORDERER_ENDPOINT=$(aws managedblockchain get-network --network-id $NETWORK_ID --query 'Network.FrameworkAttributes.Fabric.OrderingServiceEndpoint' --output text)
+export CA_ENDPOINT=$(aws managedblockchain get-member --network-id $NETWORK_ID --member-id $MEMBER_ID --query 'Member.FrameworkAttributes.Fabric.CaEndpoint' --output text)
+export PEER_ENDPOINT=$(aws managedblockchain get-node --network-id $NETWORK_ID --member-id $MEMBER_ID --node-id $NODE_ID --query 'Node.FrameworkAttributes.Fabric.PeerEndpoint' --output text)
+
+
+export ADMIN_PASSWORD_SECRET_ID=$(aws cloudformation describe-stacks --stack-name $CREDENTIALS_STACK --query 'Stacks[0].Outputs[?OutputKey==`AdminPasswordName`].OutputValue' --output text)
+export ADMIN_PASSWORD=$(aws secretsmanager get-secret-value --secret-id $ADMIN_PASSWORD_SECRET_ID --query 'SecretString' --output text)
+export ENCODED_ADMIN_PASSWORD=$(python3 -c "import urllib; print(urllib.parse.quote('''$ADMIN_PASSWORD'''))")
+
+export DATABASE_SECRET_ID=$(aws cloudformation describe-stacks --stack-name $EXPLORER_STACK --query 'Stacks[0].Outputs[?OutputKey==`DatabaseSecretName`].OutputValue' --output text)
+export DATABASE_SECRET=$(aws secretsmanager get-secret-value --secret-id $DATABASE_SECRET_ID --query 'SecretString' --output text)
+
+
+sudo yum install -y jq postgresql
+
+. ~/.nvm/nvm.sh
+nvm install 12
+nvm use 12
+
+
+pushd "$HOME/environment"
+git clone https://github.com/hyperledger/blockchain-explorer
+pushd blockchain-explorer
+git checkout 1.1.8
+popd
+popd
+
+
+# Set up connection to PostgreSQL and load initial data
+export DB_HOSTNAME=$(echo $DATABASE_SECRET | jq -r .host)
+export DB_USERNAME=$(echo $DATABASE_SECRET | jq -r .username)
+export DB_PASSWORD=$(echo $DATABASE_SECRET | jq -r .password)
+export EXPLORER_CONFIG="../blockchain-explorer/app/explorerconfig.json"
+cp explorer/explorerconfig.json "$EXPLORER_CONFIG"
+sed -i "s|%DB_HOSTNAME%|$DB_HOSTNAME|g" "$EXPLORER_CONFIG"
+sed -i "s|%DB_USERNAME%|$DB_USERNAME|g" "$EXPLORER_CONFIG"
+sed -i "s|%DB_PASSWORD%|$DB_PASSWORD|g" "$EXPLORER_CONFIG"
+export PGPASSWORD="$DB_PASSWORD"
+psql -X -h $DB_HOSTNAME --username=$DB_USERNAME -v dbname=fabricexplorer -v user=$DB_USERNAME -v passwd=\'$DB_PASSWORD\' -f ../blockchain-explorer/app/persistence/fabric/postgreSQL/db/explorerpg.sql ;
+psql -X -h $DB_HOSTNAME --username=$DB_USERNAME -v dbname=fabricexplorer -v user=$DB_USERNAME -v passwd=\'$DB_PASSWORD\' -f ../blockchain-explorer/app/persistence/fabric/postgreSQL/db/updatepg.sql ;
+
+
+# Set up connection to Hyperledger Fabric
+export CA_FILE="$HOME/managedblockchain-tls-chain.pem"
+export FABRIC_CONFIG="../blockchain-explorer/app/platform/fabric/document-ledger.json"
+cp explorer/*.json ../blockchain-explorer/app/platform/fabric/
+files=( $HOME/fabric-admin-msp/keystore/* )
+sed -i "s|%KEYSTORE_FILENAME%|${files[0]}|g" $FABRIC_CONFIG
+files=( $HOME/fabric-admin-msp/signcerts/* )
+sed -i "s|%SIGNEDCERTS_FILENAME%|${files[0]}|g" $FABRIC_CONFIG
+sed -i "s|%CA_FILE%|$CA_FILE|g" $FABRIC_CONFIG
+sed -i "s|%MEMBER_ID%|$MEMBER_ID|g" $FABRIC_CONFIG
+sed -i "s|%ORDERER_ENDPOINT%|$ORDERER_ENDPOINT|g" $FABRIC_CONFIG
+sed -i "s|%ORDERER_ENDPOINT_NO_PORT%|${ORDERER_ENDPOINT/:*/}|g" $FABRIC_CONFIG
+sed -i "s|%CA_ENDPOINT%|$CA_ENDPOINT|g" $FABRIC_CONFIG
+sed -i "s|%PEER_ENDPOINT%|$PEER_ENDPOINT|g" $FABRIC_CONFIG
+sed -i "s|%PEER_ENDPOINT_NO_PORT%|${PEER_ENDPOINT/:*/}|g" $FABRIC_CONFIG
+sed -i "s|%ADMIN_PASSWORD%|$ENCODED_ADMIN_PASSWORD|g" $FABRIC_CONFIG
+
+
+# Install Hyperledger explorer dependencies and build it
+pushd "$HOME/environment/blockchain-explorer"
+npm install
+pushd app/test
+npm install
+popd
+pushd client
+npm install
+npm run build
+popd
+npm run build

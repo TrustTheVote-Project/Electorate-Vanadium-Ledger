@@ -1,0 +1,8 @@
+{
+    "FrameworkAttributes": {
+        "Fabric": {
+            "PeerEndpoint": "",
+            "PeerEventEndpoint": ""
+        }
+    }
+}

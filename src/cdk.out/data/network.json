@@ -1,0 +1,8 @@
+{
+    "FrameworkAttributes": {
+        "Fabric": {
+            "OrderingServiceEndpoint"
+        }
+    },
+    "VpcEndpointServiceName": ""
+}

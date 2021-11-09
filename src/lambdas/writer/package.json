@@ -1,0 +1,8 @@
+{
+  "name": "writer",
+  "version": "0.0.1",
+  "dependencies": {
+    "fabric-client": "1.4.0",
+    "log4js": "6.1.2"
+  }
+}

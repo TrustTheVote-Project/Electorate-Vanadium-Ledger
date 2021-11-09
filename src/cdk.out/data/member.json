@@ -1,0 +1,10 @@
+{
+    "Id": "",
+    "Name": "",
+    "FrameworkAttributes": {
+        "Fabric": {
+            "CaEndpoint": "",
+            "PeerEndpoint": "",
+        }
+    },
+}

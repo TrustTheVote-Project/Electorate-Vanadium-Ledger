@@ -1,0 +1,19 @@
+Organizations:
+    - &Org1
+        Name: __MEMBERID__
+        ID: __MEMBERID__
+        MSPDir: /opt/home/fabric-admin-msp
+        AnchorPeers:
+            - Host:
+              Port:
+
+Application: &ApplicationDefaults
+    Organizations:
+
+Profiles:
+    OneOrgChannel:
+        Consortium: AWSSystemConsortium
+        Application:
+            <<: *ApplicationDefaults
+            Organizations:
+                - *Org1

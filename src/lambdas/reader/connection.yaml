@@ -1,0 +1,49 @@
+name: "document-ledger"
+x-type: "hlfv1"
+description: "Document Ledger"
+version: "1.0"
+
+organizations:
+  Org1:
+    mspid: m-TS3V3C5OXRGOJAWCE734Y2OVOM
+    peers:
+      - peer1
+    certificateAuthorities:
+      - ca-org1
+
+certificateAuthorities:
+  ca-org1:
+    url: https://ca.m-ts3v3c5oxrgojawce734y2ovom.n-vptxumzq2fdmdnxb6xnfuk7xsm.managedblockchain.us-east-1.amazonaws.com:30002
+    httpOptions:
+      verify: false
+    tlsCACerts:
+      path: ./managedblockchain-tls-chain.pem
+    caName: m-TS3V3C5OXRGOJAWCE734Y2OVOM
+
+orderers:
+  orderer.com:
+    url: grpcs://orderer.n-vptxumzq2fdmdnxb6xnfuk7xsm.managedblockchain.us-east-1.amazonaws.com:30001
+    grpcOptions:
+      ssl-target-name-override: orderer.n-vptxumzq2fdmdnxb6xnfuk7xsm.managedblockchain.us-east-1.amazonaws.com
+    tlsCACerts:
+      path: ./managedblockchain-tls-chain.pem
+
+peers:
+  peer1:
+    url: grpcs://nd-lunqh66ssndcrervnjegxogkum.m-ts3v3c5oxrgojawce734y2ovom.n-vptxumzq2fdmdnxb6xnfuk7xsm.managedblockchain.us-east-1.amazonaws.com:30003
+    eventUrl: grpcs://%PEER_EVENT_ENDPOINT%
+    grpcOptions:
+      ssl-target-name-override: nd-lunqh66ssndcrervnjegxogkum.m-ts3v3c5oxrgojawce734y2ovom.n-vptxumzq2fdmdnxb6xnfuk7xsm.managedblockchain.us-east-1.amazonaws.com
+    tlsCACerts:
+      path: ./managedblockchain-tls-chain.pem
+
+channels:
+  documents:
+    orderers:
+      - orderer.com
+    peers:
+      peer1:
+        endorsingPeer: true
+        chaincodeQuery: true
+        ledgerQuery: true
+        eventSource: true
