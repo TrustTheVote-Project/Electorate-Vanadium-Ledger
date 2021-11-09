@@ -1,0 +1,8 @@
+.cdk.staging
+cdk.out
+cdk.context.json
+node_modules
+
+*.pem
+lambdas/reader/connection.yaml
+lambdas/writer/connection.yaml

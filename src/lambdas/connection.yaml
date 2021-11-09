@@ -1,0 +1,48 @@
+name: "document-ledger"
+x-type: "hlfv1"
+description: "Document Ledger"
+version: "1.0"
+
+organizations:
+  Org1:
+    mspid: %MEMBER_ID%
+    peers:
+      - peer1
+    certificateAuthorities:
+      - ca-org1
+
+certificateAuthorities:
+  ca-org1:
+    url: https://%CA_ENDPOINT%
+    httpOptions:
+      verify: false
+    tlsCACerts:
+      path: ./managedblockchain-tls-chain.pem
+    caName: %MEMBER_ID%
+
+orderers:
+  orderer.com:
+    url: grpcs://%ORDERER_ENDPOINT%
+    grpcOptions:
+      ssl-target-name-override: %ORDERER_ENDPOINT_NO_PORT%
+    tlsCACerts:
+      path: ./managedblockchain-tls-chain.pem
+
+peers:
+  peer1:
+    url: grpcs://%PEER_ENDPOINT%
+    grpcOptions:
+      ssl-target-name-override: %PEER_ENDPOINT_NO_PORT%
+    tlsCACerts:
+      path: ./managedblockchain-tls-chain.pem
+
+channels:
+  documents:
+    orderers:
+      - orderer.com
+    peers:
+      peer1:
+        endorsingPeer: true
+        chaincodeQuery: true
+        ledgerQuery: true
+        eventSource: true
