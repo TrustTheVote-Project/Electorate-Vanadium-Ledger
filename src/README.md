@@ -23,6 +23,7 @@ cd amazon-managed-blockchain-document-ledger
 ### Initial Setup
 
 ```bash
+chmod +x scripts/*.sh
 scripts/install-prerequisites.sh
 scripts/get-cloud9-data.sh
 ```
