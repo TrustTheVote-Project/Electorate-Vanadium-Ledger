@@ -1,0 +1,99 @@
+#+title: The Friendly Vanadium Ledger Primer
+#+date: <2021-11-05 Fri>
+#+author: cew
+#+email: cliff@osetfoundation.org
+
+Welecome to the Friendly Vanadium Ledger Primer! This document will,
+we hope, give you most of what you need to get a demonstration
+instance of the Vanadium Ledger up and running in your own
+environment.
+
+*An important note:* In an actual deployment, of course, Electorate
+Vanadium would run with a high level of security: there would be real
+secrets, and there would be no path from the Internet to the Vanadium
+APIs.
+
+* Prerequisites
+  This demo installation needs the AWS Cloud9 IDE. [[https://aws.amazon.com/cloud9/getting-started/][Getting started
+  with AWS Cloud9]] gives step-by-step instructions creating an AWS
+  account if you don't already have one; setting up AWS Cloud9;
+  creating a Cloud9 environment to work in; and a basic tutorial to
+  get you started.
+
+* Installation
+  The README file in the =src/= directory of this repository contains
+  a terse set of directives for installing and deploying an instance
+  of Vanadium Ledger.  It assumes you have set up your Cloud9
+  environment and are logged into the Cloud9 shell.
+
+* Overview of the Vandium Architecture
+  Vanadium is not a monolithic application.  It is a distributed
+  system of cloud-based services: separate pieces of software running
+  on separate virtual servers and communicating via network-based APIs.
+
+* How to Append a Record to the Vanadium Ledger
+  The Vanadium Agent can be configured to perform state-specific
+  validations on the voter records being appended to the ledger, but
+  for this demonstration the rules have been relaxed.
+
+  For some sample data, let's download some examples.  In your Cloud9
+  environment, do the following:
+
+  #+begin_src sh
+    cd ~/environment
+    git clone https://github.com/TrustTheVote-Project/NIST-1500-100-103-examples.git
+  #+end_src
+
+  Now you can simply use curl to post a record to the Ledger's API:
+
+  #+begin_src sh
+       curl -X POST --header "Authorization:$API_WRITER_TOKEN"\
+	    --data "$DOCUMENT_CONTENT" "$API_DOCUMENTS_URL"
+  #+end_src
+
+  The following bash script shows one way to assemble all the variable
+  values in the Cloud9 terminal (as always, the credentials are
+  avaible for demonstration purposes only and would be secured in an
+  actual deployment)
+
+  #+begin_src sh
+    #!/bin/bash -e
+
+
+    cd "$(dirname ${BASH_SOURCE[0]})/.."
+
+
+    export DOCUMENT_CONTENT="$(cat "$1")"
+
+    export CREDENTIALS_STACK="CredentialsStack"
+    export INTERFACE_STACK="InterfaceStack"
+
+    export API_ENDPOINT_URL=$(aws cloudformation describe-stacks --stack-name $INTERFACE_STACK --query 'Stacks[0].Outputs[?OutputKey==`ApiEndpointUrl`].OutputValue' --output text)
+    export API_DOCUMENTS_URL="${API_ENDPOINT_URL}documents"
+
+    export API_WRITER_TOKEN_ARN=$(aws cloudformation describe-stacks --stack-name $CREDENTIALS_STACK --query 'Stacks[0].Outputs[?OutputKey==`ApiWriterTokenArn`].OutputValue' --output text)
+    export API_WRITER_TOKEN=$(aws secretsmanager get-secret-value --secret-id $API_WRITER_TOKEN_ARN --query 'SecretString' --output text)
+
+
+    echo "Writing content of $1 to ledger"
+    curl -X POST --header "Authorization:$API_WRITER_TOKEN" --data "$DOCUMENT_CONTENT" "$API_DOCUMENTS_URL"
+    echo
+  #+end_src
+
+  A copy of thi bash script has already been installed in the =tests/=
+  directory, so you can simply run it like this:
+
+  #+begin_src sh
+    tests/write-document.sh ../NIST-1500-100-103-exmples/somefile.xml
+  #+end_src
+
+* How to Inspect the Ledger with Hyperledger Explorer
+  Finally, we're going to show you how to inspect the Vanadium Ledger
+  using HyperLedger Explorer, so you can see the VRR you've just
+  posted.  Hyperledger Explorer is not part of the Vanadium Ledger
+  itself: remember, Vanadium is a distributed system of independent
+  cloud-based services.
+
+
+* The Vanadium Ledger API
+  This section includes swagger screencaps and discussion.
