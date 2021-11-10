@@ -42,3 +42,6 @@ nvm use 12
 
 prep_lambda "reader"
 prep_lambda "writer"
+
+
+echo "Lambda configuration completed successfully"

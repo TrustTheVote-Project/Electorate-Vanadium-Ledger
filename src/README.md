@@ -1,10 +1,19 @@
 # Managed Blockchain Document Ledger
 
+## Architecture
+
+![Architecture Diagram](docs/architecture.png?raw=true "Architecture Diagram")
+
 
 ## Prerequisites
 
+All the deployment steps below should be executed in a Cloud9 instance. See
 [Getting started with AWS Cloud9](https://aws.amazon.com/cloud9/getting-started/)
+for instructions on how to set one up. It is recommended to use an instance type of
+`m5.large` for this instance, otherwise leave defaults can be left as-is.
 
+Once the instance is created, open the IDE, and enter the following commands
+in the terminal.
 
 ```bash
 nvm install 16
@@ -27,7 +36,7 @@ scripts/install-prerequisites.sh
 scripts/get-cloud9-data.sh
 ```
 
-### Initial Credential
+### Credentials
 
 ```bash
 cdk deploy CredentialsStack
@@ -72,6 +81,10 @@ then pop out into new browser tab with icon in upper-right of preview panel.
 tests/write-document.sh path/to/document/file
 ```
 
+If successful, the above returns a JSON document with a `documentId` unique
+to this record (can be used to fetch it using the reader Lambda) and the
+`transactionId` that stored the document on the blockchain.
+
 
 ## To-Do
 
@@ -89,5 +102,5 @@ tests/write-document.sh path/to/document/file
 *  combine connection profiles for lambda and hyperledger explorer
 *  fixup lambda credentials (move them to creds stack, generate in prep function)
 *  eslint everything
-*  add architecture diagram to repo
-*  fix ping/pong on cloud9 outbound security group
+*  improve sleep delay in channel config script
+*  fix idempotent issues in scripts (cloud9 expansion, admin user enrollment, configtx)

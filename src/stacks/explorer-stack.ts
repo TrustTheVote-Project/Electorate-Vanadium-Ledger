@@ -34,12 +34,13 @@ export class ExplorerStack extends cdk.Stack {
 
     const database = new rds.DatabaseInstance(this, 'Database', {
       engine: rds.DatabaseInstanceEngine.postgres({version: rds.PostgresEngineVersion.VER_12}),
+      instanceType: ec2.InstanceType.of(ec2.InstanceClass.BURSTABLE3, ec2.InstanceSize.SMALL),
       vpc: defaultVpc,
       vpcSubnets: {subnets: databaseSubnets},
       publiclyAccessible: false,
     });
     
-    const cloud9SecurityGroup = ec2.SecurityGroup.fromLookup(this, 'Cloud9SecurityGroup', cloud9Data.securityGroupId);
+    const cloud9SecurityGroup = ec2.SecurityGroup.fromSecurityGroupId(this, 'Cloud9SecurityGroup', cloud9Data.securityGroupId);
     database.connections.allowDefaultPortFrom(cloud9SecurityGroup);
 
     new cdk.CfnOutput(this, 'DatabaseSecretArn', {

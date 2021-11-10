@@ -37,3 +37,6 @@ echo '{"FrameworkAttributes":{"Fabric":{"PeerEndpoint":"","PeerEventEndpoint":""
 
 echo "Bootstrapping CDK"
 cdk bootstrap
+
+
+echo "Prerequisites successfully installed"

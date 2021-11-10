@@ -16,4 +16,6 @@ export API_WRITER_TOKEN_ARN=$(aws cloudformation describe-stacks --stack-name $C
 export API_WRITER_TOKEN=$(aws secretsmanager get-secret-value --secret-id $API_WRITER_TOKEN_ARN --query 'SecretString' --output text)
 
 
+echo "Writing content of $1 to ledger"
 curl -X POST --header "Authorization:$API_WRITER_TOKEN" --data "$DOCUMENT_CONTENT" "$API_DOCUMENTS_URL"
+echo

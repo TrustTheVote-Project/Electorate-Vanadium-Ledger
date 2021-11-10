@@ -17,12 +17,8 @@ aws managedblockchain update-member --network-id $NETWORK_ID --member-id $MEMBER
 aws managedblockchain update-node --network-id $NETWORK_ID --member-id $MEMBER_ID --node-id $NODE_ID --log-publishing-configuration '{"Fabric":{"ChaincodeLogs":{"Cloudwatch":{"Enabled":true}},"PeerLogs":{"Cloudwatch":{"Enabled":true}}}}'
 
 
-echo "Downloading Amazon Managed Blockchain TLS certs"
-export CA_CERT_FILE="$HOME/managedblockchain-tls-chain.pem"
-aws s3 cp "s3://us-east-1.managedblockchain/etc/managedblockchain-tls-chain.pem" "$CA_CERT_FILE"
-
-
 echo "Setting up admin identity"
+export CA_CERT_FILE="$HOME/managedblockchain-tls-chain.pem"
 export CA_ENDPOINT=$(aws managedblockchain get-member --network-id $NETWORK_ID --member-id $MEMBER_ID --query 'Member.FrameworkAttributes.Fabric.CaEndpoint' --output text)
 export ADMIN_PASSWORD_ARN=$(aws cloudformation describe-stacks --stack-name $CREDENTIALS_STACK --query 'Stacks[0].Outputs[?OutputKey==`AdminPasswordArn`].OutputValue' --output text)
 export ADMIN_PASSWORD=$(aws secretsmanager get-secret-value --secret-id $ADMIN_PASSWORD_ARN --query 'SecretString' --output text)
@@ -30,7 +26,6 @@ export ENCODED_ADMIN_PASSWORD=$(python3 -c "import urllib.parse; print(urllib.pa
 export CA_ADMIN_FULL_URL="https://admin:$ENCODED_ADMIN_PASSWORD@$CA_ENDPOINT"
 export FABRIC_CA_IMAGE="hyperledger/fabric-ca:1.4.9"
 export ADMIN_CERTS_DIR="$HOME/fabric-admin-certs"
-
 docker run -v "$HOME:$HOME" "$FABRIC_CA_IMAGE" fabric-ca-client enroll -u "$CA_ADMIN_FULL_URL" --tls.certfiles "$CA_CERT_FILE" -M "$ADMIN_CERTS_DIR"
 sudo chown -R $USER: $ADMIN_CERTS_DIR
 mkdir -p $ADMIN_CERTS_DIR/admincerts
@@ -49,7 +44,9 @@ cp "fabric/configtx.yaml" "$HOME/"
 sed -i "s|%MEMBER_ID%|$MEMBER_ID|g" "$HOME/configtx.yaml"
 export FABRIC_TOOLS_IMAGE="hyperledger/fabric-tools:1.2.0"
 docker run -v "$HOME:/opt/home" $FABRIC_TOOLS_IMAGE configtxgen -outputCreateChannelTx /opt/home/$CHANNEL_NAME.pb -profile OneOrgChannel -channelID $CHANNEL_NAME --configPath /opt/home/
-sleep 10.0
+
+echo "Waiting 3 minutes for configuration to settle before proceeding"
+sleep 180.0
 
 echo "Creating channel"
 export ORDERER_ENDPOINT=$(aws managedblockchain get-network --network-id $NETWORK_ID --query 'Network.FrameworkAttributes.Fabric.OrderingServiceEndpoint' --output text)
@@ -79,3 +76,6 @@ docker run -v "$HOME:/opt/home" \
     -e "CORE_PEER_ADDRESS=$PEER_ENDPOINT" \
     -e "CORE_PEER_LOCALMSPID=$MEMBER_ID" \
     $FABRIC_TOOLS_IMAGE peer channel join -b /opt/home/$CHANNEL_NAME.block -o $ORDERER_ENDPOINT --cafile /opt/home/managedblockchain-tls-chain.pem --tls
+
+
+echo "Ledger configuration completed successfully"

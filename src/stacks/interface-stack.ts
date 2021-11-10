@@ -109,9 +109,8 @@ export class InterfaceStack extends cdk.Stack {
       privateDnsEnabled: true,
     });
 
-    const cloud9SecurityGroup = ec2.SecurityGroup.fromLookup(this, 'Cloud9SecurityGroup', cloud9Data.securityGroupId);
+    const cloud9SecurityGroup = ec2.SecurityGroup.fromSecurityGroupId(this, 'Cloud9SecurityGroup', cloud9Data.securityGroupId);
     defaultVpcEndpoint.connections.allowFrom(cloud9SecurityGroup, ec2.Port.allTraffic());
-    cloud9SecurityGroup.addEgressRule(ec2.Peer.anyIpv4(), ec2.Port.allTraffic());
 
     const authorizer = new apigateway.TokenAuthorizer(this, 'TokenAuthorizer', {handler: authorizerFunction});
 
