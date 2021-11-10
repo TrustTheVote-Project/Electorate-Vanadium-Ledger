@@ -39,13 +39,13 @@ scripts/get-cloud9-data.sh
 ### Credentials
 
 ```bash
-cdk deploy -f CredentialsStack
+cdk deploy CredentialsStack
 ```
 
 ### Hyperledger Components
 
 ```bash
-cdk deploy -f LedgerStack
+cdk deploy LedgerStack
 scripts/get-ledger-data.sh
 ```
 
@@ -53,7 +53,7 @@ scripts/get-ledger-data.sh
 
 ```bash
 scripts/configure-lambdas.sh
-cdk deploy -f InterfaceStack
+cdk deploy InterfaceStack
 ```
 
 ### Hyperledger Configuration
@@ -66,7 +66,7 @@ scripts/configure-chaincode.sh
 ### Hyperledger Explorer
 
 ```bash
-cdk deploy -f ExplorerStack
+cdk deploy ExplorerStack
 scripts/setup-hyperledger-explorer.sh
 scripts/start-hyperledger-explorer.sh
 ```
@@ -103,4 +103,4 @@ to this record (can be used to fetch it using the reader Lambda) and the
 *  fixup lambda credentials (move them to creds stack, generate in prep function)
 *  eslint everything
 *  improve sleep delay in channel config script
-*  fix idempotent issues in scrirpts (cloud9 expansion, admin user enrollment, configtx)
+*  fix idempotent issues in scripts (cloud9 expansion, admin user enrollment, configtx)

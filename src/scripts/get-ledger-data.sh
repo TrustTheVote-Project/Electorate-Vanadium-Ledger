@@ -21,3 +21,6 @@ aws managedblockchain get-node --network-id $NETWORK_ID --member-id $MEMBER_ID -
 echo "Downloading Amazon Managed Blockchain TLS certs"
 export CA_CERT_FILE="$HOME/managedblockchain-tls-chain.pem"
 aws s3 cp "s3://us-east-1.managedblockchain/etc/managedblockchain-tls-chain.pem" "$CA_CERT_FILE"
+
+
+echo "Ledger data export completed successfully"

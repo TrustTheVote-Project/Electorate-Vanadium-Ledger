@@ -87,3 +87,5 @@ npm install
 npm run build
 popd
 npm run build
+
+echo "Hyperledger Explorer setup completed successfully"

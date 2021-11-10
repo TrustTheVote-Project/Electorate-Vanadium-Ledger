@@ -40,3 +40,6 @@ docker run -v "$HOME:/opt/home" \
     -e "CORE_PEER_ADDRESS=$PEER_ENDPOINT" \
     -e "CORE_PEER_LOCALMSPID=$MEMBER_ID" \
     $FABRIC_TOOLS_IMAGE peer chaincode instantiate -o $ORDERER_ENDPOINT -C $CHANNEL_NAME -n $CHAINCODE_NAME -v $CHAINCODE_VERSION -c '{"Args":["init"]}' --cafile /opt/home/managedblockchain-tls-chain.pem --tls
+
+
+echo "Chaincode configuration completed successfully"

@@ -13,3 +13,6 @@ SECURITY_GROUP_ID=$(aws ec2 describe-security-groups --group-name $SECURITY_GROU
 echo "Exporting Cloud9 data"
 mkdir -p cdk.out/data
 echo "{\"instanceId\": \"$INSTANCE_ID\", \"securityGroupId\": \"$SECURITY_GROUP_ID\"}" > cdk.out/data/cloud9.json
+
+
+echo "Cloud9 data export completed successfully"
