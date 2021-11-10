@@ -10,13 +10,13 @@ export class CredentialsStack extends cdk.Stack {
     const tokenRequirements = {
       passwordLength: 32,
       requireEachIncludedType: true,
-      excludeCharacters: '\'"/\\@&{}<>*',
+      excludeCharacters: '\'"/\\@&{}<>*|',
     };
 
     const passwordRequirements = {
       passwordLength: 32,
       requireEachIncludedType: true,
-      excludeCharacters: '\'"/\\@&{}<>*',
+      excludeCharacters: '\'"/\\@&{}<>*|',
     };
 
     const apiReaderToken = new secretsmanager.Secret(this, 'ApiReaderToken', {generateSecretString: tokenRequirements});

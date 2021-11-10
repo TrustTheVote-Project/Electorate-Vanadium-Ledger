@@ -7,17 +7,17 @@ cd "$(dirname ${BASH_SOURCE[0]})/.."
 scripts/install-prerequisites.sh
 scripts/get-cloud9-data.sh
 
-cdk deploy CredentialsStack
+cdk deploy -f CredentialsStack
 
-cdk deploy LedgerStack
+cdk deploy -f LedgerStack
 scripts/get-ledger-data.sh
 
 scripts/configure-lambdas.sh
-cdk deploy InterfaceStack
+cdk deploy -f InterfaceStack
 
 scripts/configure-ledger.sh
 scripts/configure-chaincode.sh
 
-cdk deploy ExplorerStack
+cdk deploy -f ExplorerStack
 scripts/setup-hyperledger-explorer.sh
 scripts/start-hyperledger-explorer.sh

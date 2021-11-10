@@ -17,11 +17,6 @@ aws managedblockchain update-member --network-id $NETWORK_ID --member-id $MEMBER
 aws managedblockchain update-node --network-id $NETWORK_ID --member-id $MEMBER_ID --node-id $NODE_ID --log-publishing-configuration '{"Fabric":{"ChaincodeLogs":{"Cloudwatch":{"Enabled":true}},"PeerLogs":{"Cloudwatch":{"Enabled":true}}}}'
 
 
-echo "Downloading Amazon Managed Blockchain TLS certs"
-export CA_CERT_FILE="$HOME/managedblockchain-tls-chain.pem"
-aws s3 cp "s3://us-east-1.managedblockchain/etc/managedblockchain-tls-chain.pem" "$CA_CERT_FILE"
-
-
 echo "Setting up admin identity"
 export CA_ENDPOINT=$(aws managedblockchain get-member --network-id $NETWORK_ID --member-id $MEMBER_ID --query 'Member.FrameworkAttributes.Fabric.CaEndpoint' --output text)
 export ADMIN_PASSWORD_ARN=$(aws cloudformation describe-stacks --stack-name $CREDENTIALS_STACK --query 'Stacks[0].Outputs[?OutputKey==`AdminPasswordArn`].OutputValue' --output text)
@@ -49,7 +44,7 @@ cp "fabric/configtx.yaml" "$HOME/"
 sed -i "s|%MEMBER_ID%|$MEMBER_ID|g" "$HOME/configtx.yaml"
 export FABRIC_TOOLS_IMAGE="hyperledger/fabric-tools:1.2.0"
 docker run -v "$HOME:/opt/home" $FABRIC_TOOLS_IMAGE configtxgen -outputCreateChannelTx /opt/home/$CHANNEL_NAME.pb -profile OneOrgChannel -channelID $CHANNEL_NAME --configPath /opt/home/
-sleep 10.0
+sleep 120.0
 
 echo "Creating channel"
 export ORDERER_ENDPOINT=$(aws managedblockchain get-network --network-id $NETWORK_ID --query 'Network.FrameworkAttributes.Fabric.OrderingServiceEndpoint' --output text)
