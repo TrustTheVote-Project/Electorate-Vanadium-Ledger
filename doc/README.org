@@ -26,11 +26,6 @@ APIs.
   of Vanadium Ledger.  It assumes you have set up your Cloud9
   environment and are logged into the Cloud9 shell.
 
-* Overview of the Vandium Architecture
-  Vanadium is not a monolithic application.  It is a distributed
-  system of cloud-based services: separate pieces of software running
-  on separate virtual servers and communicating via network-based APIs.
-
 * How to Append a Record to the Vanadium Ledger
   The Vanadium Agent can be configured to perform state-specific
   validations on the voter records being appended to the ledger, but
@@ -94,6 +89,13 @@ APIs.
   itself: remember, Vanadium is a distributed system of independent
   cloud-based services.
 
+  #+begin_src sh
+    cd ~/src
+    cdk deploy ExplorerStack
+    scripts/setup-hyperledger-explorer.sh
+    scripts/start-hyperledger-explorer.sh
+  #+end_src
 
-* The Vanadium Ledger API
-  This section includes swagger screencaps and discussion.
+  Now click on Preview button in Cloud 9 IDE, and select Preview
+  Running Application,then pop out into new browser tab with icon in
+  upper-right of preview panel.
