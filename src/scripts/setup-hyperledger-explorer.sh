@@ -34,9 +34,11 @@ nvm use 12
 
 
 echo "Cloning repository"
+export EXPLORER_DIR="$HOME/environment/blockchain-explorer"
+rm -rf "$EXPLORER_DIR"
 pushd "$HOME/environment"
 git clone https://github.com/hyperledger/blockchain-explorer
-pushd "blockchain-explorer"
+pushd "$EXPLORER_DIR"
 git checkout v1.1.8
 popd
 popd
@@ -46,7 +48,7 @@ echo "Setting up connection to PostgreSQL"
 export DB_HOSTNAME=$(echo $DATABASE_SECRET | jq -r .host)
 export DB_USERNAME=$(echo $DATABASE_SECRET | jq -r .username)
 export DB_PASSWORD=$(echo $DATABASE_SECRET | jq -r .password)
-export EXPLORER_CONFIG="../blockchain-explorer/app/explorerconfig.json"
+export EXPLORER_CONFIG="$EXPLORER_DIR/app/explorerconfig.json"
 cp explorer/explorerconfig.json "$EXPLORER_CONFIG"
 sed -i "s|%DB_HOSTNAME%|$DB_HOSTNAME|g" "$EXPLORER_CONFIG"
 sed -i "s|%DB_USERNAME%|$DB_USERNAME|g" "$EXPLORER_CONFIG"
@@ -54,14 +56,14 @@ sed -i "s|%DB_PASSWORD%|$DB_PASSWORD|g" "$EXPLORER_CONFIG"
 
 echo "Setting up database schema"
 export PGPASSWORD="$DB_PASSWORD"
-psql -X -h $DB_HOSTNAME --username=$DB_USERNAME -v dbname=fabricexplorer -v user=$DB_USERNAME -v passwd=\'$DB_PASSWORD\' -f ../blockchain-explorer/app/persistence/fabric/postgreSQL/db/explorerpg.sql ;
-psql -X -h $DB_HOSTNAME --username=$DB_USERNAME -v dbname=fabricexplorer -v user=$DB_USERNAME -v passwd=\'$DB_PASSWORD\' -f ../blockchain-explorer/app/persistence/fabric/postgreSQL/db/updatepg.sql ;
+psql -X -h $DB_HOSTNAME --username=$DB_USERNAME -v dbname=fabricexplorer -v user=$DB_USERNAME -v passwd=\'$DB_PASSWORD\' -f "$EXPLORER_DIR/app/persistence/fabric/postgreSQL/db/explorerpg.sql"
+psql -X -h $DB_HOSTNAME --username=$DB_USERNAME -v dbname=fabricexplorer -v user=$DB_USERNAME -v passwd=\'$DB_PASSWORD\' -f "$EXPLORER_DIR/app/persistence/fabric/postgreSQL/db/updatepg.sql"
 
 
 echo "Setting up connection to Hyperledger Fabric"
 export CA_FILE="$HOME/managedblockchain-tls-chain.pem"
-export FABRIC_CONFIG="../blockchain-explorer/app/platform/fabric/document-ledger.json"
-cp explorer/*.json ../blockchain-explorer/app/platform/fabric/
+export FABRIC_CONFIG="$EXPLORER_DIR/app/platform/fabric/document-ledger.json"
+cp explorer/*.json "$EXPLORER_DIR/app/platform/fabric/"
 files=( $HOME/fabric-admin-certs/keystore/* )
 sed -i "s|%PRIVATE_KEY_FILENAME%|${files[0]}|g" $FABRIC_CONFIG
 files=( $HOME/fabric-admin-certs/signcerts/* )
@@ -77,7 +79,7 @@ sed -i "s|%ADMIN_PASSWORD%|$ADMIN_PASSWORD|g" $FABRIC_CONFIG
 
 
 echo "Building Hyperledger Explorer"
-pushd "$HOME/environment/blockchain-explorer"
+pushd "$EXPLORER_DIR"
 npm install
 pushd app/test
 npm install

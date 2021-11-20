@@ -9,8 +9,14 @@
 
 All the deployment steps below should be executed in a Cloud9 instance. See
 [Getting started with AWS Cloud9](https://aws.amazon.com/cloud9/getting-started/)
-for instructions on how to set one up. It is recommended to use an instance type of
-`m5.large` for this instance, otherwise leave defaults can be left as-is.
+for instructions on how to set one up.
+
+Change the following values:
+
+- instance type: m5.large
+- us-east-1a
+
+Otherwise the defaults can be left as-is.
 
 Once the instance is created, open the IDE, and enter the following commands
 in the terminal.
@@ -22,8 +28,8 @@ nvm alias default 16
 ```
 
 ```bash
-git clone https://github.com/aws-samples/amazon-managed-blockchain-document-ledger
-cd amazon-managed-blockchain-document-ledger
+git clone https://github.com/TrustTheVote-Project/Electorate-Vanadium-Ledger
+cd Electorate-Vanadium-Ledger/src
 ```
 
 
@@ -53,6 +59,10 @@ scripts/get-ledger-data.sh
 
 ```bash
 scripts/configure-lambdas.sh
+```
+
+The following step may take up to forty minutes to complete:
+```bash
 cdk deploy InterfaceStack
 ```
 

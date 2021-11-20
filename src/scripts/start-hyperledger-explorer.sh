@@ -9,5 +9,5 @@ nvm install 12
 nvm use 12
 
 
-cd ../blockchain-explorer
+cd "$HOME/environment/blockchain-explorer"
 DISCOVERY_AS_LOCALHOST=false ./start.sh
