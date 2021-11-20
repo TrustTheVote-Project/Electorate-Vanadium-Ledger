@@ -31,32 +31,63 @@ APIs.
   validations on the voter records being appended to the ledger, but
   for this demonstration the rules have been relaxed.
 
-  For some sample data, let's download some examples.  In your Cloud9
-  environment, do the following:
+  Let us imagine that a voter has used an online tool to fill out a
+  voter registration form:
 
-  #+begin_src sh
-    cd ~/environment
-    git clone https://github.com/TrustTheVote-Project/NIST-1500-100-103-examples.git
+  #+NAME example_registration_form
+  [[file:adams.png]]
+
+  Let us also imagine that the data she entered into the form has been
+  transmitted to the Registrar as a VRR record:
+
+  #+begin_src xml
+    <?xml version="1.0" encoding="UTF-8"?>
+    <VoterRecordsRequest xmlns="http://itl.nist.gov/ns/voting/1500-102/v1"
+	xmlns:xsd="https://www.w3.org/2001/XMLSchema"
+	xmlns:xsi="http;//www.w3.org/2001/XMLSchema-instance"
+	xmlns:addr_type="https://www.fgdc.gov/schemas/address/addr_type"
+	xmlns:addr="https://www.fgdc.gov/schemas/address/addr">
+	<GeneratedDate>2021-11-19</GeneratedDate>
+	<RequestMethod>voter-via-mail</RequestMethod>
+	<Subject>
+	    <ContactMethod>
+		<Type>email</Type>
+		<Value>abigail@adams.com</Value>
+	    </ContactMethod>
+	    <DateOfBirth>1901-11-22</DateOfBirth>
+	    <Name>
+		<FirstName>Abigail</FirstName>
+		<MiddleName>Smith</MiddleName>
+		<LastName>Adams</LastName>
+	    </Name>
+	    <ResidenceAddress>
+		<NumberedThoroughfareAddress_type>
+		    <addr:CompletePlaceName>
+			<addr_type:PlaceName>Quincy</addr_type:PlaceName>
+		     </addr:CompletePlaceName>
+		    <StateName>MA</StateName>
+		</NumberedThoroughfareAddress_type>
+	    </ResidenceAddress>
+	</Subject>
+	<Type>registration</Type>
+    </VoterRecordsRequest>
   #+end_src
 
-  Now you can simply use curl to post a record to the Ledger's API:
+  
 
-  #+begin_src sh
-       curl -X POST --header "Authorization:$API_WRITER_TOKEN"\
-	    --data "$DOCUMENT_CONTENT" "$API_DOCUMENTS_URL"
-  #+end_src
-
-  The following bash script shows one way to assemble all the variable
-  values in the Cloud9 terminal (as always, the credentials are
+  We can create a simple script to post this record to the Ledger's
+  API from the AWS Cloud9 terminal.  The script retrieves the
+  authentication credentials and the URL for the API, and then uses
+  =curl= to perform an HTTP POST.  (As always, the credentials are
   avaible for demonstration purposes only and would be secured in an
-  actual deployment)
+  actual deployment.)
+
 
   #+begin_src sh
     #!/bin/bash -e
-
+    # test.sh
 
     cd "$(dirname ${BASH_SOURCE[0]})/.."
-
 
     export DOCUMENT_CONTENT="$(cat "$1")"
 
@@ -69,17 +100,16 @@ APIs.
     export API_WRITER_TOKEN_ARN=$(aws cloudformation describe-stacks --stack-name $CREDENTIALS_STACK --query 'Stacks[0].Outputs[?OutputKey==`ApiWriterTokenArn`].OutputValue' --output text)
     export API_WRITER_TOKEN=$(aws secretsmanager get-secret-value --secret-id $API_WRITER_TOKEN_ARN --query 'SecretString' --output text)
 
-
-    echo "Writing content of $1 to ledger"
+    echo "Writing contents of $1 to ledger"
     curl -X POST --header "Authorization:$API_WRITER_TOKEN" --data "$DOCUMENT_CONTENT" "$API_DOCUMENTS_URL"
-    echo
+    echo "Contents written
   #+end_src
 
-  A copy of thi bash script has already been installed in the =tests/=
-  directory, so you can simply run it like this:
+  Now we can simply use the script to post an append request to the
+  Ledger's API:
 
   #+begin_src sh
-    tests/write-document.sh ../NIST-1500-100-103-exmples/somefile.xml
+    tests/write-document.sh form.xml
   #+end_src
 
 * How to Inspect the Ledger with Hyperledger Explorer
