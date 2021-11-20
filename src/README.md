@@ -14,10 +14,9 @@ for instructions on how to set one up.
 Change the following values:
 
 - instance type: m5.large
+- us-east-1a
 
-
- It is recommended to use an instance type of
-`m5.large` for this instance, otherwise leave defaults can be left as-is.
+Otherwise the defaults can be left as-is.
 
 Once the instance is created, open the IDE, and enter the following commands
 in the terminal.
