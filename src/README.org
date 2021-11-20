@@ -1,0 +1,132 @@
+#+options: ':nil *:t -:t ::t <:nil  \n:nil ^:t num:nil
+#+options: author:t
+#+options: timestamp:t title:t toc:nil |:t
+#+title: How to Deploy AWS Managed Blockchain for Vanadium Ledger
+#+date: <2021-11-20 Sat>
+#+author: Clifford Wulfman
+#+email: cwulfman@gmail.com
+#+language: en
+#+select_tags: export
+#+exclude_tags: noexport
+
+The Vanadium Ledger's implementation is centered on the use of Amazon
+Managed Blockchain. As a result, much of the software in this
+repository is deployment automation for setting up a ledger. The
+application-specific software is limited to lambda-function software
+that works with an API Gateway to implement a serverless entry point
+to the underlying ledger.
+
+* Prerequisities
+** Create an AWS Cloud9 Instance
+  All the deployment steps below should be executed in a Cloud9
+  instance.  See [[https://aws.amazon.com/cloud9/getting-started/][Getting started with AWS Cloud9]] for instructions on
+  how to set one up. *Be sure to change these default values:*
+
+  - instance type :: m5.large
+  - region :: us-east-1a
+
+  Otherwise the defaults can be left as-is.
+
+** Set Up NVM 16
+  Once the instance is created, open the IDE and enter the following
+  commands in the terminal.
+
+  #+begin_src sh
+    nvm install 16
+    nvm use 16
+    nvm alias default 16
+  #+end_src
+
+** Download the Electorate Vanadium Ledger Deployment Scripts
+   Clone this GitHub repository into your Cloud9 environment:
+
+   #+begin_src sh
+     git clone https://github.com/TrustTheVote-Project/Electorate-Vanadium-Ledger
+   #+end_src
+
+* Deployment
+  You need to run the deployment scripts in the
+  =Electorate-Vanadium-Ledger/src= directory.
+
+** Initial Setup
+   #+begin_src sh
+     cd Electorate-Vanadium-Ledger/src
+     scripts/install-prerequisites.sh
+     scripts/get-cloud9-data.sh
+   #+end_src
+
+** Deploy Stacks
+   Use the AWS Cloud Development Kit to deploy components of the
+   Ledger (stacks).
+
+*** The Credentials Stack
+     #+begin_src sh
+       cdk deploy CredentialsStack
+     #+end_src
+
+*** The Hyperledger Stack
+    Deploy the Ledger Stack and configure it.
+
+    #+begin_src sh
+      cdk deploy LedgerStack
+      scripts/get-ledger-data.sh
+    #+end_src
+    
+*** The Interface Stack
+    First, configure the lambdas that will be used in the system:
+
+    #+begin_src sh
+      scripts/configure-lambdas.sh
+    #+end_src
+
+    Now deploy the Interface Stack. The following step may take up to
+    forty minutes to complete:
+    
+    #+begin_src sh
+      cdk deploy InterfaceStack
+    #+end_src
+
+** Configure the Hyperledger
+   Configure the ledger and the chaincode that runs within it:
+
+   #+begin_src sh
+     scripts/configure-ledger.sh
+     scripts/configure-chaincode.sh
+    #+end_src
+
+** Finishing Up
+   The Hyperledger is now deployed and running.  To test it, create a
+   test file and write it to the ledger, using the simple shell script
+   =tests/write-document.sh=:
+
+   #+begin_src sh
+     echo "This is a test." > testdoc.txt
+     ./tests/write-document.sh ./testdoc.txt
+   #+end_src
+
+
+   If successful, the above returns a JSON document with a
+   =documentId= unique to this record (which can be used to fetch the
+   record using the reader Lambda) and the =transactionId= that stored
+   the document on the blockchain.
+
+
+* Hyperledger Explorer
+  While not strictly part of the Vanadium Ledger, Hyperledger Explorer
+  is an open-source web application that can be used to examine
+  running Hyperledger instances.
+** Deploy Hyperledger
+   #+begin_src sh
+     cdk deploy ExplorerStack
+     scripts/setup-hyperledger-explorer.sh
+   #+end_src
+
+   You can start the hyperledger from your Cloud9 terminal:
+   #+begin_src sh
+     scripts/start-hyperledger-explorer.sh
+   #+end_src
+
+   Now you should be able to see it by clicking on the Preview button
+   in Cloud 9 IDE, selecting Preview Running Application, and then pop
+   out into new browser tab with icon in upper-right of preview panel.
+
