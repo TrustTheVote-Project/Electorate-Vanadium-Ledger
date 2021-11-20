@@ -11,6 +11,9 @@ access the data warehouse. Electorate Vanadium Ledger is the underlying
 data storage for the warehouse, implementing the actual distributed
 digital ledger.
 
+#+caption: The Vandium Ledger Architecture
+file:src/docs/architecture.png
+
 The Vanadium Ledger's implementation is centered on the use of Amazon
 Managed Blockchain. As a result, much of the software in this repository
 is deployment automation for setting up a ledger. The
