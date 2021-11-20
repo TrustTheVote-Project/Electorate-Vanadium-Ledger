@@ -35,6 +35,7 @@ nvm use 12
 
 echo "Cloning repository"
 export EXPLORER_DIR="$HOME/environment/blockchain-explorer"
+rm -rf "$EXPLORER_DIR"
 pushd "$HOME/environment"
 git clone https://github.com/hyperledger/blockchain-explorer
 pushd "$EXPLORER_DIR"
