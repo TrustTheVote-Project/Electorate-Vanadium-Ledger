@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<VoterRecordsRequest xmlns="http://itl.nist.gov/ns/voting/1500-102/v1"
+    xmlns:xsd="https://www.w3.org/2001/XMLSchema"
+    xmlns:xsi="http;//www.w3.org/2001/XMLSchema-instance"
+    xmlns:addr_type="https://www.fgdc.gov/schemas/address/addr_type"
+    xmlns:addr="https://www.fgdc.gov/schemas/address/addr">
+    <GeneratedDate>2021-11-19</GeneratedDate>
+    <RequestMethod>voter-via-mail</RequestMethod>
+    <Subject>
+        <ContactMethod>
+            <Type>email</Type>
+            <Value>abigail@adams.com</Value>
+        </ContactMethod>
+        <DateOfBirth>1901-11-22</DateOfBirth>
+        <Name>
+            <FirstName>Abigail</FirstName>
+            <MiddleName>Smith</MiddleName>
+            <LastName>Adams</LastName>
+        </Name>
+        <ResidenceAddress>
+            <NumberedThoroughfareAddress_type>
+                <addr:CompletePlaceName>
+                    <addr_type:PlaceName>Quincy</addr_type:PlaceName>
+                 </addr:CompletePlaceName>
+                <StateName>MA</StateName>
+            </NumberedThoroughfareAddress_type>
+        </ResidenceAddress>
+    </Subject>
+    <Type>registration</Type>
+</VoterRecordsRequest>
