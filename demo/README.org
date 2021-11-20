@@ -1,0 +1,137 @@
+#+options: ':nil *:t -:t ::t <:t  \n:nil ^:t 
+#+options: author:t broken-links:nil c:nil creator:nil
+#+options: d:(not "LOGBOOK") date:t e:t email:nil f:t inline:t num:nil
+#+options: p:nil pri:nil prop:nil stat:t tags:t tasks:t tex:t
+#+options: timestamp:t title:t toc:nil todo:t |:t 
+#+title: Vanadium Ledger: A Demonstration
+#+date: <2021-11-20 Sat>
+#+author: Clifford Wulfman
+#+email: cwulfman@gmail.com
+#+language: en
+#+select_tags: export
+#+exclude_tags: noexport
+#+creator: Emacs 27.2 (Org mode 9.4.4)
+
+Hi.  Today I'm going to show you the Electorate Vanadium Ledger, a
+component of the ElectOS software framework developed by the OSET
+Institute.
+
+* Introducing ElectOS Electorate and the Vanadium Ledger
+  
+  #+begin_center
+  HERE A GRAPHIC OVERVIEW OF ELECTOS, HIGHLIGHTING ELECTORATE
+  #+end_center
+
+
+  Electorate is the ElectOS subsystem for managing voter registration
+  functions.  Voter registration is the process voters use to
+  communicate with election officials: to register to vote for the
+  first time, to change their address, to declare a party affiliation,
+  or to request an absentee ballot.
+
+#+begin_center
+  HERE DISSOLVE to AN OVERVIEW OF ELECTORATE ARCHITECTURE, HIGHLIGHTING
+  VANADIUM
+#+end_center
+
+  Vanadium is the data warehouse for voter records data.  Voter records
+  must be securely managed; ElectOS implements this component as a
+  distributed digital ledger.
+
+  #+begin_center
+  HERE DISSOLVE TO OVERVIEW OF VANADIUM ARCHITECTURE, HIGHTLIGHTING LEDGER
+  #+end_center
+
+  Vandium Core provides a web-services API for clients to access the
+  data warehouse, and Vanadium Ledger is the underlying data store
+  itself.  Vanadium Ledger is implemented using Amazon CloudFormation.
+
+  #+begin_center
+  FINALLY DISSOLVE TO JUD'S ARCHITECTURE DIAGRAM
+  #+end_center
+  
+  CloudFormation lets you assemble a collection of AWS resources into a
+  set of stacks.  Vanadium Ledger is a Hyperledger fabric built from a
+  series of stacks.
+  
+  The Vanadium Interface Stack provides an API Gateway, the single point
+  of access to the ledger.  The Interface stack manages access with an
+  AWS Credentials stack, and it interacts with the Managed Blockchain
+  itself through chaincode, implemented as event-driven AWS Lambda
+  services.
+
+* Deploying the Vanadium Ledger
+
+  #+begin_center
+  DISSOLVE to AWS MANAGEMENT CONSOLE
+  #+end_center
+  
+Now I'm going to show you how deploy the Electorate Vanadium Ledger.
+You will need an AWS account.
+** TODO write brief deployment script
+
+* Exploring the Vanadium Hyperledger Fabric
+  Now that we've deployed the Vanadium Ledger, let's put something on
+  it.
+
+  Let's imagine that the state of Farallon is using Electorate to
+  manage voter registration, and that election officials in Farallon
+  have created an online voter registration portal that is configured
+  to interact with Vanadium.
+
+  #+begin_center
+  Show image of Abigail Adams's registration request
+  #+end_center
+
+  Let's further imagine that a voter named Abigail Adams has used the
+  online voter registration portal to submit a registration request.
+
+  #+begin_center
+  Show image of the VRI record
+  #+end_center
+
+  The portal posts Abigail's request to the Vanadium's API Gateway in
+  the form of a Voter Records Request.  The NIST standard for VRI
+  supports a protocol of requests and responses, through which voter
+  registration data is exchanged.  Each request and response is
+  recorded on the Vanadium ledger.
+
+  #+begin_center
+  Show image of split screen Cloud9 console.  In one pane is the
+  script; in another is the VRI record; in the third is a shell in
+  which the script has been called and the results are being shown.
+  #+end_center
+
+  We can simulate that post to the Vanadium API Gateway from the
+  Cloud9 console.  Here you can see that a test script, which has been
+  seeded with the appropriate credentials, can perform a simple HTTP
+  POST to the Gateway.
+
+  Now let's see the result of that transaction on the Vanadium
+  Ledger.  We're going to use Hyperledger Explorer, a user-friendly
+  web application tool for looking at a hyperledger.
+
+  #+begin_center
+    Show screen with hyperledger explorer scripts
+  #+end_center
+
+  Hyperledger Explorer is not part of the Electorate system, which
+  carefully controls access to the ledger.  For this demonstration,
+  though, we're going to install it into our Cloud9 environment and
+  configure it so that it has access to our ledger.  This is not part
+  of a production installation.
+
+  #+begin_center
+    Show Hyperledger Explorer page
+  #+end_center
+
+  You can use Hyperledger Explorer to look at query blocks,
+  transactions, network interactions, and many other aspects of the
+  ledger.  Right now we're just going to use it to see if Abigail's
+  request has been appended to the ledger.
+
+  #+begin_center
+  Show transaction on the ledger
+  #+end_center
+
+  We navigate to the Transactions tab ...
