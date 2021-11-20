@@ -34,7 +34,7 @@ APIs.
   Let us imagine that a voter has used an online tool to fill out a
   voter registration form:
 
-  #+NAME example_registration_form
+  #+NAME: example_registration_form
   [[file:adams.png]]
 
   Let us also imagine that the data she entered into the form has been
@@ -109,7 +109,7 @@ APIs.
   Ledger's API:
 
   #+begin_src sh
-    tests/write-document.sh form.xml
+    tests/write-document.sh tests/example.vrr.xml
   #+end_src
 
 * How to Inspect the Ledger with Hyperledger Explorer
