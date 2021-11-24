@@ -1,0 +1,173 @@
+﻿* Intro
+
+  #+caption: Overview of ElectOS architecture
+  [[./assets/ElectOS.png]]
+
+  Hi.  Today I'm going to give you an overview of a few components of the ElectOS open-source election technology software being developed by the OSET Institute.
+
+  #+caption: Overview of ElectOS architecture Electorate, Versa, and Vanadium  highlighted
+  #+attr_org: :width 100
+  [[./assets/trio.png]]
+
+  Electorate provides the functions of a state-managed central voter registration system; Versa supports election data management; Vanadium is a secure data-storage system.
+
+  Let's take a look.
+
+* Overview of Service-Oriented Architecture
+
+  #+caption: Basic Service-Oriented Architecture
+  [[./assets/SOA1.png]]
+
+  Electorate and Versa are parts of a conventional services-oriented architecture.  In a service-oriented architecture, components are designed as discrete services that operate independently of one another and communicate only over a network, through a well-defined protocol, or interface.
+
+  In a typical service-oriented application, a user interacts with components of a system through a series of windows, forms, and controls, usually in a web browser running on a workstation, a tablet, or a phone.  These graphical elements are part of an independent software component, often called a web app, or app, that captures the user's keypresses, mouse clicks, gestures, or voice commands and translates them into requests that are sent over a network to another independent software component, or more than one.  These other components perform the business of the application -- storing and retrieving data from a database, for example -- and they communicate with the user by sending messages over the network to the web app.  This communication medium between the web app and the business applications is called an Application Programming Interface, or API.
+
+  A typical service-oriented system has two components like this -- a front end and a back end -- but service-oriented architecture supports multiple components, and multiple APIs.  Here's another common architecture:
+
+  #+caption: Three-Tiered SOA
+  [[./assets/SOA2.png]]
+  
+  In this configuration, the web app communicates with a backend application that performs other business tasks, like user authentication, in addition to data storage and retrieval.  Those functions -- user authentication; data storage and retrieval -- are not performed directly by the business application; the are instead performed by additional services, which communicate with the business application through different APIs.  Notice that the user never communicates with these third-tier services directly; this configuration isolates operations like data storage and provides an additional layer of security.
+
+  This service-oriented model is a the heart of what is often called "The Cloud".  The Cloud is nothing more than a collection of services that are managed by large-scale providers, like Amazon, Google, and Microsoft.  The Cloud abstracts things like actual hardware into suites of services that system builders can use to construct their systems. This abstraction provides enormous advantages, including independent scaling of individual services on demand.
+
+* Electorate, Versa, and Vanadium Architecture
+
+** Overview
+
+  Now that we understand the principles of Service-Oriented Architecture, let's look at Electorate, Versa, and Vanadium and see how they fit the model.
+
+  #+caption: Electorate, Versa, and Vanadium components
+  [[./assets/trio.png]]
+
+  This isn't the whole ElectOS architecture; I'm just showing you the relevant parts today.
+
+  At a high level, Electorate, Versa, and Vanadium are three independent, service-oriented components of the ElectOS system.  Electorate provides services to manage central voter registration; Versa provides services to manage election data; and Vanadium provides services to store voter and election data securely.
+
+  Each one is, itself, a service-oriented system whose components communicate among themselves and with other ElectOS components through well defined APIs.  In the case of Electorate and Versa, those APIs are directly derived from the data model of NIST standard data formats for the exchange of voter records, and for exchange of election definitions.
+
+  Let's look at Vanadium first.
+
+** Vandium
+
+   #+caption: the DDL
+   [[./assets/DDL1.png]]
+
+   Vanadium is the ElectOS subsystem for data storage.  Election data and voter records must be securely managed, and Vanadium provides this security by using a Distributed Digital Ledger, which it uses to store voter records and their entire history, from creation through every modification.
+
+   #+caption: The Vanadium DLL
+
+   Vanadium's distributed digital ledger is implemented as a Hyperledger Fabric deployed in the Amazon Web Services cloud computing platform using AWS’s Managed Blockchain service. Hyperledger Fabric is an open-source project hosted by the Hyperledger Foundation, a non-profit organization that nurtures an ecosystem of open source, enterprise-level blockchain software projects. The Vanadium distributed digital ledger is a Hyperledger Fabric of nodes, each of which includes the software for appending to and reading from the ledger, as well as validation logic for determining whether a requested append is authorized and legitimate.
+
+   #+caption: The Vanadium Agent
+   [[./assets/DDLandAgent.png]]
+
+   Above the ledger is the Vanadium Ledger Agent, which is the sole point of entry for access to the ledger.
+
+   #+caption: The API Gateway
+   [[./assets/APIGateway.png]]
+
+   Vanadium components communicate with the Agent through an API Gateway, which forwards append requests from authorized components to the Agent. In this serverless architecture for the Agent, there is no permanently provisioned virtual server to create costs and possibly be a target for malware.
+
+   #+caption: Cryptographic Injection
+   [[./assets/secrets.png]]
+
+   The Vanadium Ledger Agent is the only component that can write to the ledger. At deployment time, cryptographic keys are configured into the Agent that give it permission to append voter records to the DLL; the Agent is also configured with authorization credentials that it shares with the Vanadium components that are allowed to ask the Agent to make appendments.
+   
+   #+caption: Vanadium Core
+   [[./assets/core.png]]
+
+   Just above the API Gateway is the Vanadium Core service, which implements the Electorate API for the various other components of Electorate. Like the Agent, the Vanadium Core is configured with an API key at deployment time; the Core uses this key when submitting append requests to the Agent via the API Gateway: the Agent will only fulfill append requests if the API Key is valid.
+
+   We'll see how all this works in a few minutes.
+
+** Versa
+
+   Versa is the ElectOS Election Data Manager (sometimes called an EDM).  Like that of the other components we are discussing today, Versa's architecture is a service-oriented architecture:
+
+   #+caption: Versa has a service-oriented architecture
+   [[./assets/versa1.png]]
+
+   - The back-end stores all stateful election data;
+     
+   - The front-end performs the business logic of the data manager
+
+     Between the back-end and the front-end Manager is an API; the data model used in the API is the Election Results Reporting Common Data Format, a NIST standard.
+
+     On top of the Manager is another API: this one provides services to web apps to create, edit, and manage the various elements of elections, such as contests, candidates, and questions, as well as jurisdiction elements: electoral districts; vote-tallying districts; precincts; splits; and any state-specific jurisdictional data.
+
+     The web apps are the graphical user interfaces to the Manager component; Election Officials use these apps on their workstations.  In ElectOS, such workstations can be either a typical multi-purpose PC, or can be an ElectOS “browser appliance” that uses regular PC hardware with purpose built system image that runs only a browser that can communicate only with the server(s) that offer the user interfaces needed by the user. The latter case eliminates many cyber security risks that are present in the first, where a user might be using a compromised PC to interact with an ElectOS component.
+
+*** Versa in Action
+    
+     Let's have a look at how Versa works.
+
+     Let's imagine that an election official is adding a new candidate to a contest in an election.  The Manager’s web user interface is accessible to the EO’s browser via the election facility's Internet connection, enabling network access to the cloud-deployed ED/Manager.  The official uses the graphical links and buttons to navigate to a screen that displays information about the contest, and then uses a form to enter information about the new candidate.  When the official clicks on the "Create" button, the web application creates an HTTP request with the data and sends it to the Manager.
+
+     The Manager includes business logic for determining whether and how to perform the request.  If the request is legitimate, the Manager sends a request to the back end via the EDM API.
+
+     Upon receipt of the request, the back end does two things:
+
+     - it logs the request on the Vanadium ledger (we'll see more about that in a moment);
+     - and it updates the election definition as requested.
+
+     Versa/EDM also has external data interfaces for bulk data import of external data, such as geo-spatial data and existing jurisdictional definitions.
+
+** Electorate
+   Now let's look at the Electorate Component.
+
+   {{ Electorate architecture }}
+
+   Like Versa, Electorate has a service-oriented architecture.  In this case, the front end is a component called Registrar Electorate Registrar, and the back end is the Electorate Vanadium Core.
+
+   Electorate Registrar is composed of software modules that are used by voter-registration staff.  Each module has a web user interface for a specific function in VR processing, such as data entry from paper voter registration forms, review newly arrived requests from an OVR portal, etc.
+
+*** Electorate example
+   Let's walk through an example.
+
+   {{ flow diagram 1 }}
+
+   Let's suppose a voter has mailed in a paper voter-registration form requesting a change of address.  An election official uses a web form to transcribe the voter's data and send a request to Vanadium Core.  When it receives the request, the Core validates it, perhaps using state-specific validation rules; if the request is valid, the Core converts the request into an object in a NIST standard data represention called VRI and then uses its credentials (the API key required for authorized access) to forward the request object to an Agent, via the API Gateway.
+
+   Agents are implemented as AWS Lambdas: small services that can be spun up to execute a task and then terminate.  When it receives the request object from the Core, the API Gateway validates the Gateway's credentials and, if they are valid, launches an Agent with the object to append to the ledger. The Agent in turn uses its credentials (different from those of the Gateway) to make an append request to one of the nodes in the Hyperledger fabric.
+
+   Now we're at the hyperledger level.  The node that received the Agent's append request validates the Agent's credentials and then, if they are valid, appends a new block to its local instance of the ledger, a block containing the VRI object and a variety of cryptographic measures that are standard part of Hyperledger's functionality.  The Hyperledger's consistency protocol ensures that this new block is propagated to the other nodes in the fabric.
+
+*** other functions
+    Vanadium Core also includes bulk data import and export, using the same browser to Web UI file upload and download. Starting from an empty set of voters, data migration occurs with an upload of a NIST 1500-102 dataset listing all the voters. To create a voter list for an election in a local jurisdiction, the UI offers a bulk download of such a dataset.
+
+** Verity
+   Now we're going to have a look at Verity.  Verity is the component of Electorate that election officials use for voter-list matching and list management.
+
+   #+caption: Verity architecture
+
+   Verity’s architecture is that of an integrated component—web front end, a scalable serverless data-store, and list matching engine. The web front end presents a web UI that users access via a workstation with a browser. The data-store is used for temporary storage of a voter list’s data and one or more external list’s data, to support the list matching computations.
+
+
+   As with other Electorate components, deployment activity provisions Verity with credentials needed to access Vanadium.
+
+   #+caption: Verity use demo
+
+   Let's look at how Verity is used for voter-list matching.
+
+   The data basis for list-matching is a voter list dataset that Verity obtains via data export request of the Electorate API. Vanadium Core produces and returns a voter list in VRI format, which Verity consumes into the data-store. External dataset acquisition is performed by a Verity operator, who uploads external datasets via Verity Web UI.  The workflow is simple:
+
+    - datasets are provisioned;
+    - the list-matching engine processes the data;
+    - the operator reviews the list match results;
+    - the operator stores the list match results
+
+    Like other Electorate components, Verity stores its data on the Vanadium distributed digital ledger, using the Electorate API.  Critically, nothing about this process changes any voter record. A match result is treated as a request to update a voter record, much the same as any other such request from any other source. It is the responsibility of an EC/Registrar user to review each such request and accept it or reject it based on consideration of all the relevant information, including, but not limited to the source of the matching data and the degree of exactness of the match. As with all Electorate activity, these accept and reject decisions are also logged and stored in Vanadium.
+
+** Voter Services Portal
+   {{ architecture of the portal }}
+
+   Finally, let's look at a public-facing component of Electorate, the Voter Services Portal.  The Portal is both an online voter registration system and a site that registered voters can use to get information.
+
+   Its architecture is very similar to Verity's, execpt that the user is a voter, not an election official.  Like Verity, the Voter Services Portal makes requests that flow through Vanadium Core to the ledger.
+
+   {{ GUI }}
+
+   Let's look at the Portal's graphical user interface, delivered through a web browser.  The form lets the user perform basic online voter-regstration functions: new voter, change of address, change of name, update of contact information, absentee ballot request, and so on.  For registered voters, there are links to a variety of information about upcoming elections.
+
+   If the voter is making a registration request, the work flow is much like the one in the Registrar component, except that that voter enters the information rather than a registrar.  In both cases, Electorate creates a registration request object which is passed through the API Gateway and, if valid, is eventually written onto the Ledger.  In an actual deployment, the VSP would rely on a proxy server that has access to the Vanadium Core server; the Core server is thereby isolated from direct communication with the VSP as a system that is necessarily connected to the Internet.
