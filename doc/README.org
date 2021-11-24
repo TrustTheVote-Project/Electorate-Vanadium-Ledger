@@ -35,7 +35,7 @@ APIs.
   voter registration form:
 
   #+NAME: example_registration_form
-  [[./assets/adams.png]]
+  [[file:adams.png]]
 
   Let us also imagine that the data she entered into the form has been
   transmitted to the Registrar as a VRR record:
